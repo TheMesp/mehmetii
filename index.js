@@ -1,7 +1,7 @@
 const {prefix,token} = require('./config.json');
 const Discord = require('discord.js');
 const client = new Discord.Client();
-const byzSmackNum = 3;
+const byzSmackNum = 4;
 client.on('ready', () => {
     
     console.log('Ready!');
@@ -12,6 +12,7 @@ client.on('message', message =>{
     let allies = message.guild.roles.find("name", "Allies");
     let axis = message.guild.roles.find("name", "Axis");
     let comintern = message.guild.roles.find("name", "Comintern");
+    let everyone = message.guild.roles.find("name", "@everyone");
     //Special case - no prefix required for mehmet delivering cold hard truth.
     if(message.content.toLowerCase() === "byzantium is good"){
         rand = Math.floor(Math.random() * byzSmackNum);
@@ -21,6 +22,8 @@ client.on('message', message =>{
             message.channel.send("no");
         if(rand == 2)
             message.channel.send("1453 best year of my life");
+        if(rand == 3)
+            message.channel.send("I conquered Constantinople at 21. What have you done with your life, " + message.author.username + "?");
     }
     //filter out the weak.
     if(!message.content.startsWith(prefix) || message.author.bot)
@@ -41,25 +44,61 @@ client.on('message', message =>{
         //valid command
         else{
             var roleName = "";
+            //connects all the arguments into one string
+            args.forEach(item => {
+                if(roleName === ""){//first arg
+                    roleName = item;
+                }
+                else{
+                    roleName += " " + item;//subsequent args
+                }
+            })
             //will return null if the role does not currently exist
-            var role = message.guild.roles.find("name", args[0].toLowerCase());
+            var role = message.guild.roles.find("name", roleName.toLowerCase());
             if(role != null){//Join pre-existing role
                 message.member.setRoles([role]);
                 message.channel.send(message.author.username + " joined " + role.name);
             }
             else{
                 message.guild.createRole({//Create new role
-                    name: args[0],//TODO: Have this recognize all future arguments
+                    name: roleName.toLowerCase(),
                     hoist: true,
                     mentionable: true,
                     color: "RANDOM"
-                })
-                    .then(//runs after CreateRole resolves the promise, and gives us role to work with
-                        role =>{
-                            message.channel.send("the " + role.name + " faction was created by " + message.author.username);
-                            console.log(role.name + " role was created."),
-                            message.member.setRoles([role])
-                        })
+                }).then(//runs after CreateRole resolves the promise, and we create role as a local variable
+                    role =>{
+                        message.channel.send("the " + role.name + " faction was created by " + message.author.username);
+                        console.log(role.name + " role was created.");
+                        message.member.setRoles([role]);
+                        //createChannel(name, type, array of PermissionOverwrites or ChannelCreationOverwrites)
+                        message.guild.createChannel(role.name, "voice",[
+                            {
+                                id: everyone,
+                                deny:["CONNECT"]
+                            },{
+                                id: role,
+                                allow:["CONNECT"]
+                            }
+                        ]).then(
+                            console.log(role.name + " voice channel created.")
+                        ).catch(console.error)//voice createChannel error handler
+                        message.guild.createChannel(role.name + "-chat", "text",[
+                            {
+                                id: everyone,
+                                deny:["VIEW_CHANNEL"]
+                            },{
+                                id: role,
+                                allow:["VIEW_CHANNEL"]
+                            }
+                        ]).then(
+                            channel =>{
+                                console.log(role.name + " text channel created.");
+                                channel.send("Welcome to the " + role.name + " text channel.");
+                                channel.setTopic(role.name + " text channel").then().catch(console.error);
+                            }                           
+                        ).catch(console.error)//text createChannel error handler
+                    }
+                ).catch(console.error)//createRole error handler
             }
 
 
@@ -68,6 +107,31 @@ client.on('message', message =>{
     }
     //Bossman commands
     else if(message.channel.permissionsFor(message.member).has("ADMINISTRATOR")){
+        if(command === 'reset'){
+            console.log("initiating reset process");
+            message.guild.roles.forEach(role=>{//delete extraneous roles
+                if(!(role.name === "allies" || role.name === "axis" || role.name === "comintern" || role.name === "Turk" || role.name === "@everyone" || !role.editable)){//default roles
+                    console.log("deleting " + role.name + " role");
+                    role.delete();
+                }
+            })
+            message.guild.channels.forEach(channel=>{//delete extraneous channels
+                if(!(channel.name === "Allies" || channel.name === "Axis" || channel.name === "Comintern" || channel.name === "League of Nations" ||//default voice channels
+                     channel.name === "allies-chat" || channel.name === "axis-chat" || channel.name === "comintern-chat" || channel.name === "main" )){//default text channels
+                    console.log("deleting " + channel.name + " channel");
+                    channel.delete();
+                }
+                else if(channel.type === "text" && !(channel.name === "main")){
+                    channel.bulkDelete(99,true);
+                    channel.send("Welcome to the " + channel.name.substr(0,channel.name.indexOf("-")) + " text channel.");
+                }
+            })
+            message.guild.members.forEach(member=>{//reset roles
+                if(!(member.hasPermission("ADMINISTRATOR"))){
+                    member.setRoles([]);
+                }
+            })
+        }
         if(command === 'prune'){
             if(args.size != 0){
                 message.channel.bulkDelete(args[0],true);
