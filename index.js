@@ -19,7 +19,7 @@ client.on('ready', () => {
      
 });
 client.on('message', message =>{
-    //defines roles
+    //defines standard roles
     let allies = message.guild.roles.find("name", "Allies");
     let axis = message.guild.roles.find("name", "Axis");
     let comintern = message.guild.roles.find("name", "Comintern");
