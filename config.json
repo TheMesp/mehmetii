@@ -1,4 +1,6 @@
 {
     "prefix": "!",
-    "token" : "MzY5MTU4NDc4MzM5NTA2MTg4.DeG1Bg.jQciApht0OSQ_aKJIL2qL0TlU_w"
+    "defaultVoiceChannels": ["Allies","Axis","Comintern","League of Nations"],
+    "defaultTextChannels": ["allies-chat","axis-chat","comintern-chat","main"],
+    "defaultRoles": ["@everyone","allies","axis","comintern","Turk"]
 }

@@ -1,7 +1,18 @@
-const {prefix,token} = require('./config.json');
+//const {prefix,token,defaultTextChannels,defaultVoiceChannels,defaultRoles} = require('./config.json');
+const config = require('./config.json');
+const token = require('./token.json')
 const Discord = require('discord.js');
 const client = new Discord.Client();
 const byzSmackNum = 4;
+function contains(target, set){
+    var output = false;
+    set.forEach(item=>{
+        if(item === target){
+            output = true;
+        }
+    });
+    return output;
+}
 client.on('ready', () => {
     
     console.log('Ready!');
@@ -26,10 +37,10 @@ client.on('message', message =>{
             message.channel.send("I conquered Constantinople at 21. What have you done with your life, " + message.author.username + "?");
     }
     //filter out the weak.
-    if(!message.content.startsWith(prefix) || message.author.bot)
+    if(!message.content.startsWith(config.prefix) || message.author.bot)
         return;
 
-    const args = message.content.slice(prefix.length).split(' ');//Turns the textline into an array of args.
+    const args = message.content.slice(config.prefix.length).split(' ');//Turns the textline into an array of args.
     const command = args.shift().toLowerCase();//returns the first argument (the command) and then removes it from the array.
     //prints the message to the console.
     console.log(message.author.username + " said: " + message.content);
@@ -110,7 +121,8 @@ client.on('message', message =>{
         if(command === 'reset'){
             console.log("initiating reset process");
             message.guild.roles.forEach(role=>{//delete extraneous roles
-                if(!(role.name === "allies" || role.name === "axis" || role.name === "comintern" || role.name === "Turk" || role.name === "@everyone" || !role.editable)){//default roles
+                //if(!(role.name === "allies" || role.name === "axis" || role.name === "comintern" || role.name === "Turk" || role.name === "@everyone" || !role.editable)){//default roles
+                if(contains(role.name, config.defaultRoles) && role.editable){//TODO: figure out configs
                     console.log("deleting " + role.name + " role");
                     role.delete();
                 }
@@ -139,4 +151,4 @@ client.on('message', message =>{
         }
     }
 })
-client.login(token);
+client.login(token.token);
