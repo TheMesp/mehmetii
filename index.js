@@ -121,19 +121,17 @@ client.on('message', message =>{
         if(command === 'reset'){
             console.log("initiating reset process");
             message.guild.roles.forEach(role=>{//delete extraneous roles
-                //if(!(role.name === "allies" || role.name === "axis" || role.name === "comintern" || role.name === "Turk" || role.name === "@everyone" || !role.editable)){//default roles
-                if(contains(role.name, config.defaultRoles) && role.editable){//TODO: figure out configs
+                if(!contains(role.name, config.defaultRoles) && role.editable){
                     console.log("deleting " + role.name + " role");
                     role.delete();
                 }
             })
             message.guild.channels.forEach(channel=>{//delete extraneous channels
-                if(!(channel.name === "Allies" || channel.name === "Axis" || channel.name === "Comintern" || channel.name === "League of Nations" ||//default voice channels
-                     channel.name === "allies-chat" || channel.name === "axis-chat" || channel.name === "comintern-chat" || channel.name === "main" )){//default text channels
+                if(!contains(channel.name, config.defaultVoiceChannels) && !contains(channel.name, config.defaultTextChannels)){
                     console.log("deleting " + channel.name + " channel");
                     channel.delete();
                 }
-                else if(channel.type === "text" && !(channel.name === "main")){
+                else if(channel.type === "text" && !(channel.name === "main")){//send opening texts to the other text channels
                     channel.bulkDelete(99,true);
                     channel.send("Welcome to the " + channel.name.substr(0,channel.name.indexOf("-")) + " text channel.");
                 }
