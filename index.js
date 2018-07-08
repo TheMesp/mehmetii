@@ -25,7 +25,7 @@ client.on('message', message =>{
     let comintern = message.guild.roles.find("name", "Comintern");
     let everyone = message.guild.roles.find("name", "@everyone");
     //Special case - no prefix required for mehmet delivering cold hard truth.
-    if(message.content.toLowerCase() === "byzantium is good"){
+    if(message.content.toLowerCase().contains("byzantium")){
         rand = Math.floor(Math.random() * byzSmackNum);
         if(rand == 0)
             message.channel.send("I hear " + message.author.username + " is a filthy Grecophile.");
