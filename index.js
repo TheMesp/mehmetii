@@ -25,7 +25,7 @@ client.on('message', message =>{
     let comintern = message.guild.roles.find("name", "Comintern");
     let everyone = message.guild.roles.find("name", "@everyone");
     //Special case - no prefix required for mehmet delivering cold hard truth.
-    if(message.content.toLowerCase().contains("byzantium")){
+    if(message.content.toLowerCase().includes("byzantium")){
         rand = Math.floor(Math.random() * byzSmackNum);
         if(rand == 0)
             message.channel.send("I hear " + message.author.username + " is a filthy Grecophile.");
@@ -45,7 +45,11 @@ client.on('message', message =>{
     //prints the message to the console.
     console.log(message.author.username + " said: " + message.content);
     console.log("command: " + command);
-    console.log("args: " + args); 
+    console.log("args: " + args);
+    if(command === "advice"){
+        message.channel.send("When attacking abroad, always keep local political strife under control. You never know when you might have to kill your 17th brother.");
+        message.channel.send("well, that is, you always have to. Claimant scum");
+    }
     //faction joining
     if(command === "join"){
         //invalid command
@@ -121,7 +125,7 @@ client.on('message', message =>{
         if(command === 'reset'){
             console.log("initiating reset process");
             message.guild.roles.forEach(role=>{//delete extraneous roles
-                if(!contains(role.name, config.defaultRoles) && role.editable){
+                if(!contains(role.name.toLowerCase(), config.defaultRoles) && role.editable){
                     console.log("deleting " + role.name + " role");
                     role.delete();
                 }
